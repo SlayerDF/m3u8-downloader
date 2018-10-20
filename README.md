@@ -2,7 +2,7 @@
 
 Simple m3u8 playlist downloader built with Node JS
 
-#How to use
+# How to use
 
 Install dependencies
 
