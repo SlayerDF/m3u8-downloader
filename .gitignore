@@ -1,0 +1,5 @@
+logs
+*.log
+node_modules/
+result.mp4
+tmp
