@@ -1,4 +1,4 @@
-const fs = require('fs'),
+const fs = require('fs-extra'),
       path = require('path'),
       miss = require('mississippi'),
       byoneline = require('byoneline'),
@@ -6,12 +6,12 @@ const fs = require('fs'),
       helpers = require('./helpers')
 
 module.exports = async function (url, directoryPath) {
-  let link = url.substring(0, url.indexOf('?')).replace('.m3u8', ''),
+  let link = url.substring(0, url.indexOf('?') !== -1 ? url.indexOf('?') : url.length).replace('.m3u8', ''),
       regex = new RegExp(link.split('/').pop().replace('.', '\\.') + '(.+\\.ts)'),
       parsedPath = path.join(directoryPath, 'parsed.m3u8'),
       parts = []
 
-  if (!await helpers.exists(parsedPath)) {
+  if (!await fs.pathExists(parsedPath)) {
     await new Promise(async (resolve, reject) => {
       miss.pipe(
         byoneline.createStream((await axios({
@@ -52,7 +52,8 @@ module.exports = async function (url, directoryPath) {
             link: link + parts[this.counter - 1]
           }
         }
-      } else return { done: true }
+      }
+      else return { done: true }
     }
   }
 }

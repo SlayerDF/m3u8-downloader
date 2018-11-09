@@ -1,10 +1,7 @@
-const readline = require('readline'),
+const Promise = require('bluebird'),
+      readline = require('readline'),
       axios = require('axios'),
-      fs = require('fs')
-
-module.exports.exists = function (path) {
-  return new Promise((resolve, reject) => fs.access(path, fs.constants.F_OK, err => resolve(!err)))
-}
+      fs = require('fs-extra')
 
 module.exports.download = function (url, path) {
   return new Promise((resolve, reject) =>
@@ -20,6 +17,11 @@ module.exports.download = function (url, path) {
   )
 }
 
+module.exports.validateFile = async function (url, path) {
+  if (!await fs.pathExists(path)) return false
+  return (await axios.head(url)).headers['content-length'] === (await fs.stat(path)).size.toString()
+}
+
 module.exports.readline = function (path, cb) {
   return new Promise((resolve, reject) => {
     readline.createInterface({ input: fs.createReadStream(path) })
@@ -27,4 +29,16 @@ module.exports.readline = function (path, cb) {
       .on('close', resolve)
       .on('error', reject)
   })
+}
+
+module.exports.concatFiles = async function (fileInputs, fileOutput) {
+  await fs.remove(fileOutput)
+
+  return Promise.each(fileInputs, input => new Promise((resolve, reject) => {
+    let writeStream = fs.createWriteStream(fileOutput, { flags: 'a' })
+      .on('close', resolve)
+      .on('error', reject)
+
+    fs.createReadStream(input).pipe(writeStream)
+  }))
 }
