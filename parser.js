@@ -6,7 +6,7 @@ const fs = require('fs'),
       helpers = require('./helpers')
 
 module.exports = async function (url, directoryPath) {
-  let link = url.replace('.m3u8', ''),
+  let link = url.substring(0, url.indexOf('?')).replace('.m3u8', ''),
       regex = new RegExp(link.split('/').pop().replace('.', '\\.') + '(.+\\.ts)'),
       parsedPath = path.join(directoryPath, 'parsed.m3u8'),
       parts = []
